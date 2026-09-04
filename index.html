@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2475d5">
+<title>나의 궤적 · MY TRACE</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--bg:#f5f8fc;--card:#fff;--text:#172235;--muted:#7d8999;--blue:#2475d5;--line:#e6ebf1;--soft:#eaf4ff;--good:#2e9b6d;--warn:#d38a25}
+*{box-sizing:border-box}body{margin:0;background:#e9eef5;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+button,input,select{font:inherit}.app{max-width:430px;min-height:100vh;margin:auto;background:var(--bg);position:relative}
+header{position:sticky;top:0;z-index:5;background:#ffffffee;backdrop-filter:blur(12px);padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.brand{font-size:20px;font-weight:850}.brand small{display:block;font-size:10px;color:var(--muted);font-weight:500;margin-top:3px}
+.page{display:none}.page.active{display:block}main{padding:15px 16px 95px}.title{font-size:23px;font-weight:850;margin:5px 0 13px}
+.hero{border-radius:25px;padding:21px;color:white;background:linear-gradient(145deg,#214f80,#65abd0);min-height:168px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-90px;top:-100px;background:#fff2}.hero small{opacity:.9}.hero h1{margin:10px 0 6px;font-size:25px;line-height:1.35}.hero p{margin:0;font-size:13px;line-height:1.65}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.card{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 4px 18px #1b2b3a0b}.metric{font-size:25px;font-weight:850;margin-top:6px}.muted{font-size:11px;color:var(--muted)}
+.insight{margin-top:12px;padding:16px;border-radius:18px;background:var(--soft);font-size:13px;line-height:1.65}.insight b{display:block;color:#23629b;margin-bottom:5px}
+.btn{border:0;border-radius:15px;padding:14px;width:100%;font-weight:800;cursor:pointer;background:var(--blue);color:#fff;margin-top:10px}.btn.secondary{background:#e9eef5;color:#2b435d}.btn.ghost{background:#fff;color:#32506c;border:1px solid var(--line)}
+.row{display:flex;gap:10px;align-items:center;padding:12px 2px;border-bottom:1px solid #eef1f5}.row:last-child{border-bottom:0}.grow{flex:1}.dot{width:10px;height:10px;border-radius:50%;background:var(--blue)}.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#edf5ff;color:#2766a3;font-weight:800}
+.field{margin:10px 0}.field label{display:block;font-size:12px;color:#667487;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;padding:13px;border:1px solid #dce4ec;border-radius:13px;background:#fff;outline:none}.field textarea{min-height:85px;resize:vertical}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.chip{border:1px solid #dce4ec;background:#fff;padding:7px 10px;border-radius:20px;font-size:11px;cursor:pointer}.chip.on{background:#edf5ff;border-color:#a9c8eb;color:#21639e}
+.progress{height:9px;background:#e9edf3;border-radius:10px;overflow:hidden}.bar{height:100%;background:var(--blue);border-radius:10px}.legend{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin:6px 0 14px}
+.tabs{display:flex;gap:7px;overflow:auto;padding-bottom:4px}.tabs button{border:0;background:#e8edf4;color:#5e6d7f;border-radius:20px;padding:9px 13px;white-space:nowrap;font-size:11px}.tabs button.on{background:var(--blue);color:#fff}
+.badge{display:inline-block;font-size:10px;padding:5px 8px;border-radius:9px;background:#edf5ff;color:#2a679f;margin:2px}.score{font-size:30px;font-weight:900;color:var(--blue)}
+canvas{width:100%;height:160px;background:#fff;border-radius:14px}
+.empty{text-align:center;color:var(--muted);padding:25px 10px;font-size:13px;line-height:1.7}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100vw);height:70px;background:#fffffff5;backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:7}.nav button{border:0;background:none;color:#8994a4;font-size:9px;cursor:pointer}.nav button strong{display:block;font-size:20px;margin-bottom:2px}.nav button.on{color:var(--blue);font-weight:800}
+.modal{display:none;position:fixed;inset:0;background:#10203366;z-index:10;align-items:flex-end;justify-content:center}.modal.show{display:flex}.sheet{width:min(430px,100vw);background:#fff;border-radius:25px 25px 0 0;padding:19px 18px 24px;max-height:88vh;overflow:auto}.sheet h3{margin:0 0 10px;font-size:18px}.close{float:right;border:0;background:#eef2f6;border-radius:50%;width:32px;height:32px;cursor:pointer}
+.small{font-size:10px;color:var(--muted);line-height:1.55}.danger{color:#b34040!important;background:#fff1f1!important}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand">나의 궤적 <small>MY TRACE · 기록하지 않아도, 시간이 지나면 내가 보입니다.</small></div></header>
+
+<section id="home" class="page active"><main>
+<div class="hero"><small id="today"></small><h1>오늘의 나를<br>조금씩 발견해보세요.</h1><p>하루의 작은 선택이 쌓이면<br>내가 어떤 사람인지 데이터로 보이기 시작합니다.</p></div>
+<div class="grid">
+<div class="card">📍<div class="metric" id="mLoc">0</div><div class="muted">위치 기록</div></div>
+<div class="card">🏃<div class="metric" id="mAct">0</div><div class="muted">활동 기록</div></div>
+<div class="card">😊<div class="metric" id="mMood">-</div><div class="muted">평균 기분</div></div>
+<div class="card">✨<div class="metric" id="mDays">0</div><div class="muted">기록한 날짜</div></div>
+</div>
+<div class="insight"><b>🤖 지금까지의 발견</b><span id="homeInsight">데이터를 모으는 중입니다. 활동을 몇 번만 기록해도 반복 패턴을 찾아드립니다.</span></div>
+<button class="btn" onclick="locate()">📍 지금 위치 기록</button>
+<button class="btn secondary" onclick="show('record')">✍️ 오늘의 활동 기록</button>
+<button class="btn ghost" onclick="show('insight')">✨ 나의 발견 보기</button>
+<div id="gpsMsg" class="small" style="margin-top:7px"></div>
+</main></section>
+
+<section id="record" class="page"><main>
+<div class="title">오늘의 기록</div>
+<div class="card">
+<div class="field"><label>활동</label><input id="act" placeholder="예: 골프, 운동, 업무, 독서, 식사"></div>
+<div class="chips" id="actChips"></div>
+<div class="field"><label>함께한 사람 (선택)</label><input id="person" placeholder="예: 가족, 친구, 김○○"></div>
+<div class="field"><label>기분</label><select id="mood"><option value="5">😍 매우 좋음</option><option value="4">😊 좋음</option><option value="3" selected>🙂 보통</option><option value="2">😐 조금 힘듦</option><option value="1">😞 힘듦</option></select></div>
+<div class="field"><label>짧은 메모 (선택)</label><textarea id="memo" placeholder="오늘 기억하고 싶은 한마디"></textarea></div>
+<button class="btn" onclick="saveRecord()">저장하기</button>
+</div>
+<div class="card" style="margin-top:12px"><b>기록 부담을 줄이는 방법</b><p class="small">긴 일기 대신 활동 한 단어 + 기분 하나만 남겨도 됩니다. 시간이 지나면 활동·기분·사람의 관계를 비교할 수 있도록 설계했습니다.</p></div>
+</main></section>
+
+<section id="insight" class="page"><main>
+<div class="title">나의 발견</div>
+<div class="tabs"><button class="on">요약</button><button>좋아하는 활동</button><button>강점</button></div>
+<div class="card">
+<div class="muted">현재 데이터 기반 자기발견 점수</div><div class="score" id="selfScore">0%</div>
+<div class="progress"><div class="bar" id="scoreBar" style="width:0%"></div></div>
+<div class="legend"><span>데이터가 충분할수록 정확해집니다</span><span id="dataHint">0개 기록</span></div>
+</div>
+<div class="card" style="margin-top:10px"><b>가장 자주 하는 활동</b><div id="topActs" style="margin-top:10px"></div></div>
+<div class="card" style="margin-top:10px"><b>기분이 좋은 활동</b><div id="goodActs" style="margin-top:10px"></div></div>
+<div class="card" style="margin-top:10px"><b>현재 추정되는 강점</b><div id="strengths" style="margin-top:10px"></div></div>
+<div class="insight"><b>💬 AI 분석 미리보기</b><span id="aiPreview"></span></div>
+</main></section>
+
+<section id="trend" class="page"><main>
+<div class="title">나의 변화</div>
+<div class="card"><b>최근 7일 활동량</b><canvas id="chart"></canvas></div>
+<div class="grid">
+<div class="card"><div class="muted">평균 기분</div><div class="metric" id="trendMood">-</div></div>
+<div class="card"><div class="muted">새로운 활동</div><div class="metric" id="newActs">0</div></div>
+</div>
+<div class="card" style="margin-top:10px"><b>이번 기간의 변화</b><p id="trendText" class="small"></p></div>
+</main></section>
+
+<section id="more" class="page"><main>
+<div class="title">더보기</div>
+<div class="card"><button class="btn secondary" onclick="exportData()">📤 내 데이터 내보내기</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">📥 데이터 가져오기</button><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"></div>
+<div class="card" style="margin-top:12px"><b>개인정보·기록 관리</b><p class="small">현재 MVP는 입력한 기록과 위치를 브라우저의 로컬 저장소에만 보관합니다. 서버 전송 기능은 없습니다.</p><button class="btn danger" onclick="clearData()">모든 데이터 삭제</button></div>
+<div class="card" style="margin-top:12px"><b>다음 개발 단계</b><p class="small">① 실제 지도 연동 ② 백그라운드 위치 기록 ③ 캘린더 연동 ④ 사진/활동 분석 ⑤ 서버 기반 AI 분석 ⑥ iPhone·Android 정식 앱 패키징</p></div>
+</main></section>
+
+<section id="modal" class="modal"><div class="sheet"><button class="close" onclick="closeModal()">×</button><h3>데이터 미리보기</h3><div id="modalBody"></div></div></section>
+
+<nav class="nav">
+<button class="on" data-page="home">⌂<strong>홈</strong></button>
+<button data-page="record">＋<strong>기록</strong></button>
+<button data-page="insight">✦<strong>발견</strong></button>
+<button data-page="trend">◔<strong>변화</strong></button>
+<button data-page="more">•••<strong>더보기</strong></button>
+</nav>
+</div>
+
+<script>
+const KEY="mytrace_real_mvp_v1";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"locations":[],"records":[]}');
+const $=id=>document.getElementById(id);
+$("today").textContent=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
+const defaults=["골프","운동","업무","독서","식사","가족","친구","산책","여행"];
+$("actChips").innerHTML=defaults.map(x=>`<button class="chip" onclick="pick('${x}')">${x}</button>`).join("");
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function show(id){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("on",x.dataset.page===id));render();scrollTo(0,0)}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>show(b.dataset.page));
+function pick(v){$("act").value=v;document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.textContent===v))}
+function saveRecord(){
+ const activity=$("act").value.trim();
+ if(!activity){alert("활동을 한 단어라도 입력해 주세요.");return}
+ data.records.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),activity,person:$("person").value.trim(),mood:Number($("mood").value),memo:$("memo").value.trim(),at:new Date().toISOString()});
+ $("act").value="";$("person").value="";$("memo").value="";$("mood").value="3";save();show("home");
+}
+function locate(){
+ if(!navigator.geolocation){$("gpsMsg").textContent="이 브라우저에서는 위치 기능을 지원하지 않습니다.";return}
+ $("gpsMsg").textContent="현재 위치를 확인하는 중입니다…";
+ navigator.geolocation.getCurrentPosition(p=>{
+  data.locations.push({lat:p.coords.latitude,lon:p.coords.longitude,accuracy:p.coords.accuracy,at:new Date().toISOString()});save();
+  $("gpsMsg").textContent=`위치 기록 완료 · 정확도 약 ${Math.round(p.coords.accuracy)}m`;
+ },e=>$("gpsMsg").textContent="위치 권한을 허용하면 현재 위치를 기록할 수 있습니다.",{enableHighAccuracy:true,timeout:10000,maximumAge:60000});
+}
+function stats(){
+ const freq={};data.records.forEach(r=>freq[r.activity]=(freq[r.activity]||0)+1);
+ const top=Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+ const byMood={};data.records.forEach(r=>{byMood[r.activity]??=[];byMood[r.activity].push(r.mood)});
+ const good=Object.entries(byMood).map(([a,v])=>[a,v.reduce((x,y)=>x+y,0)/v.length,v.length]).sort((a,b)=>b[1]-a[1]);
+ const days=new Set(data.records.map(r=>r.at.slice(0,10))).size;
+ const avg=data.records.length?data.records.reduce((s,r)=>s+r.mood,0)/data.records.length:0;
+ const score=Math.min(100,Math.round(data.records.length*7+data.locations.length*3));
+ return {freq,top,good,days,avg,score};
+}
+function render(){
+ const s=stats();
+ $("mLoc").textContent=data.locations.length;$("mAct").textContent=data.records.length;$("mMood").textContent=s.avg?s.avg.toFixed(1):"-";$("mDays").textContent=s.days;
+ $("dataHint").textContent=`${data.records.length}개 기록`; $("selfScore").textContent=s.score+"%";$("scoreBar").style.width=s.score+"%";
+ $("topActs").innerHTML=s.top.length?s.top.slice(0,6).map(([a,c],i)=>`<span class="badge">${i+1}. ${esc(a)} · ${c}회</span>`).join(""):`<div class="empty">아직 활동 기록이 없습니다.</div>`;
+ $("goodActs").innerHTML=s.good.length?s.good.slice(0,5).map(([a,m,c])=>`<div class="row"><div class="dot"></div><div class="grow"><b>${esc(a)}</b><div class="muted">${c}회 기록</div></div><b>${m.toFixed(1)} ★</b></div>`).join(""):`<div class="empty">기분 기록이 쌓이면 좋아하는 활동을 찾을 수 있습니다.</div>`;
+ const strengths=[];
+ if(data.records.length>=3 && s.top.length){strengths.push("꾸준히 행동으로 옮기는 실행력");}
+ if(new Set(data.records.map(r=>r.person).filter(Boolean)).size>=2){strengths.push("사람과 관계를 이어가는 능력");}
+ if(new Set(data.records.map(r=>r.activity)).size>=3){strengths.push("다양한 경험을 시도하는 개방성");}
+ if(data.locations.length>=3){strengths.push("활동 반경과 생활 패턴을 스스로 관리하는 능력");}
+ $("strengths").innerHTML=strengths.length?strengths.map(x=>`<span class="badge">✨ ${x}</span>`).join(""):`<div class="empty">조금 더 데이터가 필요합니다. 활동과 기분을 몇 번만 기록해보세요.</div>`;
+ const topText=s.top[0]?`현재 가장 반복되는 활동은 “${esc(s.top[0][0])}”입니다.`:"아직 데이터가 충분하지 않습니다.";
+ const goodText=s.good[0]?` 특히 “${esc(s.good[0][0])}”에서 평균 기분이 ${s.good[0][1].toFixed(1)}점으로 높게 나타납니다.`:"";
+ $("homeInsight").innerHTML=topText+goodText;
+ $("aiPreview").innerHTML=topText+goodText+" 데이터가 충분해지면 활동·사람·장소·시간을 함께 분석하는 AI 리포트로 확장할 수 있습니다.";
+ $("trendMood").textContent=s.avg?s.avg.toFixed(1):"-";
+ const unique=new Set(data.records.map(r=>r.activity));$("newActs").textContent=unique.size;
+ $("trendText").textContent=data.records.length?`지금까지 ${s.days}일에 걸쳐 ${data.records.length}개의 활동이 기록됐습니다. 반복되는 활동과 기분의 관계를 보기 시작할 수 있는 단계입니다.`:"기록이 쌓이면 7일 단위의 활동 변화 그래프가 나타납니다.";
+ drawChart();
+}
+function drawChart(){
+ const c=$("chart"),ctx=c.getContext("2d"),dpr=devicePixelRatio||1,w=c.clientWidth,h=160;c.width=w*dpr;c.height=h*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+ const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10))}
+ const vals=days.map(day=>data.records.filter(r=>r.at.slice(0,10)===day).length),max=Math.max(3,...vals),pad=18;
+ ctx.strokeStyle="#e8edf3";ctx.lineWidth=1;for(let i=0;i<4;i++){const y=pad+i*(h-pad*2)/3;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke()}
+ ctx.strokeStyle="#2475d5";ctx.lineWidth=3;ctx.beginPath();vals.forEach((v,i)=>{const x=pad+i*((w-pad*2)/6),y=h-pad-(v/max)*(h-pad*2);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+ ctx.fillStyle="#2475d5";vals.forEach((v,i)=>{const x=pad+i*((w-pad*2)/6),y=h-pad-(v/max)*(h-pad*2);ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()});
+}
+function exportData(){
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="my_trace_backup.json";a.click();URL.revokeObjectURL(url);
+}
+function importData(e){
+ const file=e.target.files[0];if(!file)return;const fr=new FileReader();fr.onload=()=>{try{const x=JSON.parse(fr.result);if(!Array.isArray(x.records)||!Array.isArray(x.locations))throw 0;data=x;save();alert("데이터를 가져왔습니다.");}catch{alert("올바른 MY TRACE 백업 파일이 아닙니다.")}};fr.readAsText(file);e.target.value="";
+}
+function clearData(){if(confirm("모든 기록을 삭제할까요? 삭제 후 복구할 수 없습니다.")){data={locations:[],records:[]};save();}}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function openModal(){ $("modalBody").innerHTML=`<pre style="white-space:pre-wrap;font-size:10px;background:#f6f8fb;padding:12px;border-radius:12px">${esc(JSON.stringify(data,null,2))}</pre>`;$("modal").classList.add("show")}
+function closeModal(){$("modal").classList.remove("show")}
+render();
+</script>
+</body>
+</html>

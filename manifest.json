@@ -1,0 +1,9 @@
+{
+  "name": "나의 궤적 MY TRACE",
+  "short_name": "MY TRACE",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f8fc",
+  "theme_color": "#2475d5",
+  "description": "기록하지 않아도 시간이 지나면 나를 발견하는 자기분석 앱"
+}

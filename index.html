@@ -28,8 +28,22 @@ canvas{width:100%;height:160px;background:#fff;border-radius:14px}
 .empty{text-align:center;color:var(--muted);padding:25px 10px;font-size:13px;line-height:1.7}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100vw);height:70px;background:#fffffff5;backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:7}.nav button{border:0;background:none;color:#8994a4;font-size:9px;cursor:pointer}.nav button strong{display:block;font-size:20px;margin-bottom:2px}.nav button.on{color:var(--blue);font-weight:800}
 .modal{display:none;position:fixed;inset:0;background:#10203366;z-index:10;align-items:flex-end;justify-content:center}.modal.show{display:flex}.sheet{width:min(430px,100vw);background:#fff;border-radius:25px 25px 0 0;padding:19px 18px 24px;max-height:88vh;overflow:auto}.sheet h3{margin:0 0 10px;font-size:18px}.close{float:right;border:0;background:#eef2f6;border-radius:50%;width:32px;height:32px;cursor:pointer}
-.small{font-size:10px;color:var(--muted);line-height:1.55}.danger{color:#b34040!important;background:#fff1f1!important}
+.small{font-size:10px;color:var(--muted);line-height:1.55}.danger{color:#b34040!important;background:#fff1f1!important}.mini{border:0;background:#eef2f6;border-radius:10px;padding:7px 10px;font-size:12px;cursor:pointer}.recordItem{padding:10px 0;border-bottom:1px solid var(--line)}.recordItem:last-child{border-bottom:0}.itemActions{display:flex;gap:6px;margin-top:7px}.locItem{padding:9px 0;border-bottom:1px solid var(--line)}
 </style>
+
+<style>
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.stat{padding:14px;border-radius:14px;background:rgba(127,127,127,.08)}
+.stat span{display:block;font-size:12px;opacity:.65;margin-bottom:5px}
+.stat strong{font-size:18px}
+.insight{padding:15px;border-radius:14px;background:rgba(127,127,127,.08);line-height:1.6}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;z-index:9999;padding:20px}
+.modal-box{width:min(520px,100%);background:#fff;color:#111;border-radius:20px;padding:20px;box-shadow:0 15px 50px rgba(0,0,0,.2)}
+.modal-box label{display:block;margin:12px 0;font-size:13px}
+.modal-box input{display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #ddd;border-radius:10px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -60,7 +74,8 @@ canvas{width:100%;height:160px;background:#fff;border-radius:14px}
 <div class="field"><label>짧은 메모 (선택)</label><textarea id="memo" placeholder="오늘 기억하고 싶은 한마디"></textarea></div>
 <button class="btn" onclick="saveRecord()">저장하기</button>
 </div>
-<div class="card" style="margin-top:12px"><b>기록 부담을 줄이는 방법</b><p class="small">긴 일기 대신 활동 한 단어 + 기분 하나만 남겨도 됩니다. 시간이 지나면 활동·기분·사람의 관계를 비교할 수 있도록 설계했습니다.</p></div>
+<div class="card" style="margin-top:12px"><b>최근 활동 기록</b><div id="recordList" style="margin-top:10px"></div></div>
+<div class="card" style="margin-top:12px"><b>기록 부담을 줄이는 방법</b><p class="small">긴 일기 대신 활동 한 단어 + 기분 하나만 남겨도 됩니다. 기록은 언제든 수정하거나 삭제할 수 있습니다.</p></div>
 </main></section>
 
 <section id="insight" class="page"><main>
@@ -87,14 +102,36 @@ canvas{width:100%;height:160px;background:#fff;border-radius:14px}
 <div class="card" style="margin-top:10px"><b>이번 기간의 변화</b><p id="trendText" class="small"></p></div>
 </main></section>
 
+
+<section id="digital" class="section">
+  <div class="card">
+    <div class="eyebrow">DIGITAL LIFE</div>
+    <h2>오늘의 디지털 생활</h2>
+    <p class="muted">스마트폰을 어떻게 사용했는지 입력해 두면, MY TRACE가 생활 패턴과 연결해 볼 수 있습니다.</p>
+    <div class="stats-grid">
+      <div class="stat"><span>휴대폰 사용</span><strong id="screenTotal">0시간 00분</strong></div>
+      <div class="stat"><span>가장 많이 사용</span><strong id="topApp">-</strong></div>
+      <div class="stat"><span>콘텐츠</span><strong id="contentTime">0분</strong></div>
+      <div class="stat"><span>소통</span><strong id="communicationTime">0분</strong></div>
+    </div>
+    <button class="primary" onclick="openDigitalModal()">오늘의 사용 기록 입력</button>
+  </div>
+
+  <div class="card">
+    <h3>나의 디지털 패턴</h3>
+    <div id="digitalInsight" class="insight">아직 충분한 데이터가 없습니다. 사용 시간을 몇 번 입력하면 패턴을 발견할 수 있습니다.</div>
+  </div>
+</section>
+
 <section id="more" class="page"><main>
 <div class="title">더보기</div>
 <div class="card"><button class="btn secondary" onclick="exportData()">📤 내 데이터 내보내기</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">📥 데이터 가져오기</button><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"></div>
 <div class="card" style="margin-top:12px"><b>개인정보·기록 관리</b><p class="small">현재 MVP는 입력한 기록과 위치를 브라우저의 로컬 저장소에만 보관합니다. 서버 전송 기능은 없습니다.</p><button class="btn danger" onclick="clearData()">모든 데이터 삭제</button></div>
-<div class="card" style="margin-top:12px"><b>다음 개발 단계</b><p class="small">① 실제 지도 연동 ② 백그라운드 위치 기록 ③ 캘린더 연동 ④ 사진/활동 분석 ⑤ 서버 기반 AI 분석 ⑥ iPhone·Android 정식 앱 패키징</p></div>
+<div class="card" style="margin-top:12px"><b>방문·위치 기록</b><div id="locationList" style="margin-top:10px"></div></div>
+<div class="card" style="margin-top:12px"><b>다음 개발 단계</b><p class="small">① 실제 지도·장소명 연동 ② 백그라운드 위치 기록 ③ 캘린더 연동 ④ 사진/활동 분석 ⑤ 서버 기반 AI 분석 ⑥ iPhone·Android 정식 앱 패키징</p></div>
 </main></section>
 
-<section id="modal" class="modal"><div class="sheet"><button class="close" onclick="closeModal()">×</button><h3>데이터 미리보기</h3><div id="modalBody"></div></div></section>
+<section id="modal" class="modal"><div class="sheet"><button class="close" onclick="closeModal()">×</button><h3 id="modalTitle">기록 수정</h3><div id="modalBody"></div></div></section>
 
 <nav class="nav">
 <button class="on" data-page="home">⌂<strong>홈</strong></button>
@@ -107,7 +144,9 @@ canvas{width:100%;height:160px;background:#fff;border-radius:14px}
 
 <script>
 const KEY="mytrace_real_mvp_v1";
-let data=JSON.parse(localStorage.getItem(KEY)||'{"locations":[],"records":[]}');
+let data=JSON.parse(localStorage.getItem(KEY)||'{"locations":[],"records":[],"stays":[]}');
+data.locations ||= []; data.records ||= []; data.stays ||= [];
+
 const $=id=>document.getElementById(id);
 $("today").textContent=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
 const defaults=["골프","운동","업무","독서","식사","가족","친구","산책","여행"];
@@ -161,6 +200,38 @@ function render(){
  $("trendText").textContent=data.records.length?`지금까지 ${s.days}일에 걸쳐 ${data.records.length}개의 활동이 기록됐습니다. 반복되는 활동과 기분의 관계를 보기 시작할 수 있는 단계입니다.`:"기록이 쌓이면 7일 단위의 활동 변화 그래프가 나타납니다.";
  drawChart();
 }
+function fmtDate(iso){return new Date(iso).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}
+function renderRecordList(){
+ const el=$("recordList"); if(!el)return;
+ const rows=[...data.records].sort((a,b)=>new Date(b.at)-new Date(a.at)).slice(0,12);
+ el.innerHTML=rows.length?rows.map(r=>`<div class="recordItem"><b>${esc(r.activity)}</b> <span class="muted">${fmtDate(r.at)}</span><div class="small">${r.person?"👤 "+esc(r.person)+" · ":""}기분 ${"⭐".repeat(r.mood||3)}${r.memo?" · "+esc(r.memo):""}</div><div class="itemActions"><button class="mini" onclick="editRecord('${r.id}')">수정</button><button class="mini" onclick="deleteRecord('${r.id}')">삭제</button></div></div>`).join(""):`<div class="empty">아직 활동 기록이 없습니다.</div>`;
+}
+function renderLocationList(){
+ const el=$("locationList"); if(!el)return;
+ const rows=[...data.locations].sort((a,b)=>new Date(b.at)-new Date(a.at)).slice(0,12);
+ el.innerHTML=rows.length?rows.map((r,i)=>`<div class="locItem"><b>📍 위치 기록</b> <span class="muted">${fmtDate(r.at)}</span><div class="small">위도 ${Number(r.lat).toFixed(5)} · 경도 ${Number(r.lon).toFixed(5)} · 정확도 약 ${Math.round(r.accuracy||0)}m</div><div class="itemActions"><button class="mini" onclick="editLocation(${i})">수정</button><button class="mini" onclick="deleteLocation(${i})">삭제</button></div></div>`).join(""):`<div class="empty">아직 위치 기록이 없습니다.</div>`;
+}
+function editRecord(id){
+ const r=data.records.find(x=>x.id===id); if(!r)return;
+ $("modalTitle").textContent="활동 기록 수정";
+ $("modalBody").innerHTML=`<div class="field"><label>활동</label><input id="eAct" value="${esc(r.activity)}"></div><div class="field"><label>함께한 사람</label><input id="ePerson" value="${esc(r.person||"")}"></div><div class="field"><label>기분</label><select id="eMood"><option value="5">😍 매우 좋음</option><option value="4">😊 좋음</option><option value="3">🙂 보통</option><option value="2">😐 조금 힘듦</option><option value="1">😞 힘듦</option></select></div><div class="field"><label>메모</label><textarea id="eMemo">${esc(r.memo||"")}</textarea></div><div class="field"><label>날짜·시간</label><input id="eAt" type="datetime-local" value="${new Date(r.at).toISOString().slice(0,16)}"></div><button class="btn" onclick="saveEditedRecord('${id}')">변경 저장</button>`;
+ $("eMood").value=String(r.mood||3); $("modal").classList.add("show");
+}
+function saveEditedRecord(id){
+ const r=data.records.find(x=>x.id===id); if(!r)return;
+ const activity=$("eAct").value.trim(); if(!activity){alert("활동을 입력해 주세요.");return;}
+ r.activity=activity;r.person=$("ePerson").value.trim();r.mood=Number($("eMood").value);r.memo=$("eMemo").value.trim();r.at=new Date($("eAt").value).toISOString();save();closeModal();show("record");
+}
+function deleteRecord(id){if(confirm("이 활동 기록을 삭제할까요?")){data.records=data.records.filter(r=>r.id!==id);save();}}
+function editLocation(index){
+ const rows=[...data.locations].sort((a,b)=>new Date(b.at)-new Date(a.at)); const r=rows[index]; if(!r)return;
+ const realIndex=data.locations.indexOf(r); $("modalTitle").textContent="위치 기록 수정";
+ $("modalBody").innerHTML=`<div class="field"><label>위도</label><input id="eLat" type="number" step="0.000001" value="${r.lat}"></div><div class="field"><label>경도</label><input id="eLon" type="number" step="0.000001" value="${r.lon}"></div><div class="field"><label>날짜·시간</label><input id="eLocAt" type="datetime-local" value="${new Date(r.at).toISOString().slice(0,16)}"></div><button class="btn" onclick="saveEditedLocation(${realIndex})">변경 저장</button>`;
+ $("modal").classList.add("show");
+}
+function saveEditedLocation(i){const r=data.locations[i];if(!r)return;r.lat=Number($("eLat").value);r.lon=Number($("eLon").value);r.at=new Date($("eLocAt").value).toISOString();save();closeModal();show("more");}
+function deleteLocation(i){const rows=[...data.locations].sort((a,b)=>new Date(b.at)-new Date(a.at));const r=rows[i];if(r&&confirm("이 위치 기록을 삭제할까요?")){data.locations=data.locations.filter(x=>x!==r);save();}}
+function closeModal(){$("modal").classList.remove("show");}
 function drawChart(){
  const c=$("chart"),ctx=c.getContext("2d"),dpr=devicePixelRatio||1,w=c.clientWidth,h=160;c.width=w*dpr;c.height=h*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
  const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10))}
@@ -181,5 +252,64 @@ function openModal(){ $("modalBody").innerHTML=`<pre style="white-space:pre-wrap
 function closeModal(){$("modal").classList.remove("show")}
 render();
 </script>
+
+<div id="digitalModal" class="modal" style="display:none">
+  <div class="modal-box">
+    <h3>오늘의 스마트폰 사용</h3>
+    <label>전체 사용시간(분)<input id="dTotal" type="number" min="0" value="120"></label>
+    <label>가장 많이 사용한 앱<input id="dTopApp" type="text" placeholder="예: YouTube"></label>
+    <label>콘텐츠(분)<input id="dContent" type="number" min="0" value="60"></label>
+    <label>소통(분)<input id="dCommunication" type="number" min="0" value="30"></label>
+    <label>정보검색/업무(분)<input id="dWork" type="number" min="0" value="30"></label>
+    <div class="modal-actions">
+      <button onclick="closeDigitalModal()">취소</button>
+      <button class="primary" onclick="saveDigitalUsage()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DIGITAL_KEY = 'mytrace_digital_usage_v1';
+function digitalData(){ try{return JSON.parse(localStorage.getItem(DIGITAL_KEY)||'[]')}catch(e){return []} }
+function openDigitalModal(){ document.getElementById('digitalModal').style.display='flex'; }
+function closeDigitalModal(){ document.getElementById('digitalModal').style.display='none'; }
+function saveDigitalUsage(){
+  const item={
+    date:new Date().toISOString(),
+    total:+document.getElementById('dTotal').value||0,
+    topApp:document.getElementById('dTopApp').value.trim()||'-',
+    content:+document.getElementById('dContent').value||0,
+    communication:+document.getElementById('dCommunication').value||0,
+    work:+document.getElementById('dWork').value||0
+  };
+  const data=digitalData(); data.push(item);
+  localStorage.setItem(DIGITAL_KEY,JSON.stringify(data));
+  closeDigitalModal(); renderDigital();
+}
+function fmtMin(m){return Math.floor(m/60)+'시간 '+String(m%60).padStart(2,'0')+'분';}
+function renderDigital(){
+  const data=digitalData();
+  if(!data.length)return;
+  const last=data[data.length-1];
+  document.getElementById('screenTotal').textContent=fmtMin(last.total);
+  document.getElementById('topApp').textContent=last.topApp;
+  document.getElementById('contentTime').textContent=last.content+'분';
+  document.getElementById('communicationTime').textContent=last.communication+'분';
+
+  const avg=data.reduce((s,x)=>s+x.total,0)/data.length;
+  let insight='현재 기록을 바탕으로 보면 ';
+  if(last.content > last.communication && last.content > last.work) insight+='콘텐츠 소비가 가장 큰 비중을 차지하고 있습니다.';
+  else if(last.communication > last.work) insight+='사람과 소통하는 시간이 비교적 큰 편입니다.';
+  else insight+='정보검색·업무 관련 사용 비중이 비교적 큽니다.';
+  if(data.length>=3) insight+=' 최근 평균 사용시간은 '+fmtMin(Math.round(avg))+'입니다.';
+  document.getElementById('digitalInsight').textContent=insight;
+}
+function showSection(id){
+  const el=document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth'});
+}
+document.addEventListener('DOMContentLoaded',renderDigital);
+</script>
+
 </body>
 </html>
